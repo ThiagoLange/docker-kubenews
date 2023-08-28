@@ -1,0 +1,48 @@
+version: '3.9'
+
+networks:
+  kubenews_net:
+    driver: bridge
+
+volumes:
+  kubenews-volume:
+
+services:
+  kubenews-app:
+    image: thiagolange/kubenews:latest
+    build:
+      context: ./src/
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+     - kubenews_net
+    environment:
+      DB_HOST: "kubenews_db"
+      DB_USERNAME: "kubenews"
+      DB_PASSWORD: "123456"
+      DB_DATABASE: "kube"
+
+  kubenews_db:
+    image: postgres:latest
+    restart: always
+    networks:
+     - kubenews_net
+    volumes:
+     - kubenews-volume:/data/db
+    environment:
+      POSTGRES_USER: "kubenews"
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: "kube"
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+     - 8081:80
+    networks:
+     - kubenews_net
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "teste@teste.com"
+      PGADMIN_DEFAULT_PASSWORD: "123456"
